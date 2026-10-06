@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generátor výmluv</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+  <style>
+    :root {
+      --bg: #fff8ec;
+      --card: #ffffff;
+      --text: #2b2118;
+      --muted: #7a6a5a;
+      --accent: #e8743b;
+      --accent-dark: #c95a24;
+      --shadow: 0 10px 30px rgba(80, 50, 20, 0.12);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1d1814;
+        --card: #2a231d;
+        --text: #f4ece3;
+        --muted: #b5a493;
+        --accent: #f08a4b;
+        --accent-dark: #d46f30;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main {
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+    }
+    .potato {
+      font-size: 72px;
+      display: inline-block;
+      transition: transform 0.4s ease;
+    }
+    .potato.spin { transform: rotate(360deg) scale(1.15); }
+    h1 { margin: 8px 0 4px; font-size: clamp(28px, 6vw, 40px); }
+    .sub { color: var(--muted); margin: 0 0 24px; }
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 28px 22px;
+      box-shadow: var(--shadow);
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 4vw, 22px);
+      line-height: 1.5;
+      transition: opacity 0.2s ease;
+    }
+    .card.fade { opacity: 0; }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+    button {
+      font: inherit;
+      font-weight: 600;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 26px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+    button:active { transform: scale(0.96); }
+    .primary { background: var(--accent); color: #fff; }
+    .primary:hover { background: var(--accent-dark); }
+    .secondary { background: transparent; color: var(--text); border: 2px solid var(--muted); }
+    .counter { margin-top: 18px; color: var(--muted); font-size: 14px; }
+    footer { margin-top: 32px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="potato" id="potato">🥔</div>
+    <h1>Generátor výmluv</h1>
+    <p class="sub">Když potřebuješ výmluvu a fantazie stávkuje.</p>
+
+    <div class="card" id="excuse">Klikni na tlačítko a získej dokonalou výmluvu.</div>
+
+    <div class="buttons">
+      <button class="primary" id="generate">🎲 Vymysli výmluvu</button>
+      <button class="secondary" id="copy">📋 Zkopírovat</button>
+    </div>
+
+    <div class="counter" id="counter"></div>
+
+    <footer>Použití na vlastní nebezpečí. Autor nenese odpovědnost za ztracené přátele ani zaměstnání.</footer>
+  </main>
+
+  <script>
+    // Výmluva se skládá ze tří náhodných dílů: začátek + kdo/co + co se stalo
+    const zacatky = [
+      "Promiň, nemohl/a jsem přijít, protože",
+      "Úkol nemám, protože",
+      "Omlouvám se za zpoždění, ale",
+      "Nevzal/a jsem telefon, protože",
+      "Na schůzku jsem nedorazil/a, jelikož",
+      "Nádobí jsem neumyl/a, protože",
+      "Do posilovny jsem nešel/nešla, protože",
+    ];
+
+    const kdo = [
+      "moje kočka",
+      "soused z třetího patra",
+      "rozzlobený holub",
+      "moje babička",
+      "skupina turistů z Japonska",
+      "můj toustovač",
+      "tajemný muž v pyžamu",
+      "křeček mého bratrance",
+      "robotický vysavač",
+      "jedna velmi sebevědomá kachna",
+    ];
+
+    const coSeStalo = [
+      "zamkl/a moje klíče v mikrovlnce.",
+      "vyhlásil/a na mě osobní válku.",
+      "mi snědl/a ponožky a musel/a jsem počkat, až je vrátí.",
+      "mě uvěznil/a ve hře na schovávanou, která trvala 6 hodin.",
+      "prohlásil/a můj byt za nezávislý stát.",
+      "mi přeprogramoval/a budík na čínský čas.",
+      "mě unesl/a na tajnou poradu o budoucnosti brambor.",
+      "se zasekl/a ve dveřích a odmítl/a se pohnout.",
+      "mi ukradl/a boty a utekl/a s nimi do parku.",
+      "mě přesvědčil/a, že je dnes neděle.",
+      "omylem objednal/a 40 pizz na moji adresu.",
+      "spustil/a požární alarm, protože chtěl/a slyšet hudbu.",
+    ];
+
+    const nahodny = (pole) => pole[Math.floor(Math.random() * pole.length)];
+
+    const excuseEl = document.getElementById("excuse");
+    const potatoEl = document.getElementById("potato");
+    const counterEl = document.getElementById("counter");
+    let pocet = 0;
+
+    document.getElementById("generate").addEventListener("click", () => {
+      excuseEl.classList.add("fade");
+      potatoEl.classList.toggle("spin");
+      setTimeout(() => {
+        excuseEl.textContent = `${nahodny(zacatky)} ${nahodny(kdo)} ${nahodny(coSeStalo)}`;
+        excuseEl.classList.remove("fade");
+        pocet++;
+        counterEl.textContent = `Vygenerováno výmluv: ${pocet}`;
+      }, 200);
+    });
+
+    document.getElementById("copy").addEventListener("click", async (e) => {
+      try {
+        await navigator.clipboard.writeText(excuseEl.textContent);
+        e.target.textContent = "✅ Zkopírováno!";
+      } catch {
+        e.target.textContent = "❌ Nepovedlo se";
+      }
+      setTimeout(() => (e.target.textContent = "📋 Zkopírovat"), 1500);
+    });
+  </script>
+</body>
+</html>
