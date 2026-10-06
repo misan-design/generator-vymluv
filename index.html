@@ -147,6 +147,70 @@
       "spustil/a požární alarm, protože chtěl/a slyšet hudbu.",
     ];
 
+    // Hotové výmluvy s odůvodněním (z vymluvy-research.md)
+    const hotove = [
+      // 🚗 Doprava
+      ["Tramvaj odmítla jet, dokud si všichni cestující neřeknou, co mají dneska v plánu.", "Já byl/a poslední a nechtěl/a jsem lhát."],
+      ["Navigace mě poslala do Rakouska.", "Prý tam byla kratší fronta."],
+      ["Přes silnici přecházela husí rodina o 47 členech.", "Poslední house si zapomněla klíče a vracela se."],
+      ["Moje kolo mělo krizi středního věku a odjelo samo k moři.", "Nechalo mi lístek, že se vrátí, až se najde."],
+      ["Řidič autobusu se rozhodl, že dnes pojede pozpátku.", "Prý aby viděl, odkud jsme přijeli."],
+      ["Zasekl/a jsem se v otočných dveřích obchodního centra.", "Udělal/a jsem 312 koleček, než mě vysvobodila ochranka."],
+      // 😴 Zaspání
+      ["Budík mi v noci tajně přešel na letní čas jiné planety.", "Na Marsu jsem byl/a ještě včas."],
+      ["Zdálo se mi, že už jsem v práci, tak jsem nevstával/a.", "Ve snu jsem byl/a mimochodem velmi produktivní."],
+      ["Kočka mi seděla na hrudi a usoudil/a jsem, že by bylo nezdvořilé ji budit.", "Je to starší dáma, má nárok."],
+      ["Peřina mě nepustila.", "Doslova. Zip se zasekl a já byl/a uvnitř."],
+      ["Telefon se v noci aktualizoval a smazal všechna rána.", "Máme teď jen odpoledne."],
+      // 🌧️ Počasí
+      ["Foukal tak silný vítr, že jsem dvakrát dorazil/a domů, i když jsem šel/šla opačně.", "Fyzika mi to doteď nevysvětlila."],
+      ["Napadlo tolik sněhu, že mě sousedi omylem postavili jako sněhuláka.", "Měl/a jsem mrkev a všechno."],
+      ["Pršelo tak, že jsem čekal/a na archu.", "Zvířata šla po dvou a já byl/a sám/sama, tak mě nevzali."],
+      ["Bylo takové horko, že se mi rozpustily tkaničky.", "Bosky se jít nedalo, asfalt byl tekutý."],
+      ["Mlha byla tak hustá, že jsem zabloudil/a ve vlastní chodbě.", "Našel/našla jsem tam mimochodem ztracené ponožky z roku 2019."],
+      // 🤒 Nemoc
+      ["Mám alergii na pondělí.", "Doktor říkal, že je to vzácné, ale nevyléčitelné."],
+      ["Snědl/a jsem prošlý jogurt a teď mluvím jen ve verších.", "Na poradě by to bylo trapné, rým za rýmem jde mi hladce, však myšlenky mám chabé, vratké."],
+      ["Kýchl/a jsem tak silně, že jsem si vyhodil/a záda i fantazii.", "Ani tuhle výmluvu jsem nevymyslel/a sám/sama."],
+      ["Zjistil/a jsem, že jsem v noci náměsíčně uběhl/a maraton.", "Mám medaili a nevím odkud."],
+      ["Dostal/a jsem škytavku, která trvá už tři dny.", "Lékaři ji pojmenovali po mně."],
+      // 👵 Rodina a děti
+      ["Babička se naučila používat videohovory a volá každých 5 minut.", "Většinou jen ukazuje strop."],
+      ["Synovec mi schoval boty a za nápovědu chce 200 Kč.", "Vyjednávání stále probíhá."],
+      ["Tchyně nemohla přestat mluvit.", "Skutečná výmluva z průzkumu, jen jsem ji vylepšil/a: mluví pořád."],
+      ["Brácha se zamkl v koupelně a jediný klíč spolkl.", "Čekáme, až příroda udělá svoje."],
+      ["Děda vyhlásil rodinnou poradu o tom, kdo snědl poslední řízek.", "Byl/a jsem obviněn/a a musel/a se hájit."],
+      // 🐈 Zvířata
+      ["Pes mi snědl úkol a pak i náhradní úkol.", "Teď už je to princip."],
+      ["Kočka mi zamkla klíče v mikrovlnce.", "A heslo k mikrovlnce zná jen ona."],
+      ["Na balkoně se mi usadil holub a odmítá odejít, dokud mu neuznám nárok na byt.", "Má právníka."],
+      ["Křeček utekl a já ho musel/a stopovat podle drobků.", "Vedly do sousedovy kuchyně. Tam jsem zůstal/a na oběd."],
+      ["Soused mi svěřil papouška, který umí jen říkat „nikam nechoď“.", "Bylo by nezdvořilé ho neposlechnout."],
+      // 📱 Technika
+      ["Můj robotický vysavač vyhlásil stávku a zablokoval dveře.", "Požaduje kratší pracovní dobu a víc nabíjení."],
+      ["Telefon mi spadl do kafe a teď mluví jen italsky.", "Rozumím jen „espresso“."],
+      ["Lednička mi poslala zprávu, že bez ní nikam nesmím.", "Chytré domácnosti zašly moc daleko."],
+      ["Wi-Fi spadla a já nevěděl/a, jak se z bytu dostat bez Google Map.", "Dveře nemají aktualizace."],
+      ["Moje e-mailová schránka se přeplnila a začala vracet e-maily i do minulosti.", "Proto jste ode mě dostali zprávu, kterou jsem ještě nenapsal/a."],
+      ["Toustovač vystřelil toust tak vysoko, že jsem čekal/a, až dopadne.", "Pořád nedopadl."],
+      // 📚 Škola a úkoly
+      ["Úkol jsem udělal/a, ale vítr ho odnesl do vedlejšího okresu.", "Tam ho prý někdo odevzdal za mě."],
+      ["Napsal/a jsem ho neviditelným inkoustem kvůli ochraně autorských práv.", "Pro zobrazení je potřeba citrón a důvěra."],
+      ["Učebnici mi zabavil celník, protože obsahovala podezřelé množství rovnic.", "Prý se v nich skrývá x."],
+      ["Úkol jsem si uložil/a do cloudu a pak začalo pršet.", "Data jsou teď někde v kanalizaci."],
+      ["Mladší sourozenec můj úkol vybarvil a teď je to umělecké dílo.", "Odevzdávat ho by byla škoda, je v galerii."],
+      // 🗓️ Zapomnětlivost
+      ["Myslel/a jsem, že je víkend.", "Skutečná výmluva z průzkumu. Ten pocit jsem si nechtěl/a zkazit."],
+      ["Byl/a jsem přesvědčen/a, že dnes je státní svátek brambor.", "Slavím ho každý rok, vy ne?"],
+      ["Vstal/a jsem včas, ale omylem jsem se znovu oblékl/a do pyžama.", "Tělo prostě ví, co chce."],
+      ["Zapomněl/a jsem, kde bydlím, a bloudil/a jsem po celém sídlišti.", "Nakonec mě poznal pes od sousedů."],
+      ["Zamkl/a jsem se na záchodě a jediný klíč měl kocour.", "Ten byl zrovna na procházce."],
+      // 🏋️ Sport a povinnosti
+      ["Do posilovny jsem nešel/nešla, protože si činky potřebovaly odpočinout.", "Regenerace je důležitá, i pro železo."],
+      ["Nádobí jsem neumyl/a, protože talíře vytvořily umělecký projekt.", "Jmenuje se „Odvážná věž“ a nechci ho zničit."],
+      ["Nemohl/a jsem přijít, protože jsem byl/a na tajné poradě o budoucnosti brambor.", "Víc říct nemůžu, podepsal/a jsem mlčenlivost. 🥔"],
+    ];
+
     const nahodny = (pole) => pole[Math.floor(Math.random() * pole.length)];
 
     const excuseEl = document.getElementById("excuse");
@@ -158,7 +222,13 @@
       excuseEl.classList.add("fade");
       potatoEl.classList.toggle("spin");
       setTimeout(() => {
-        excuseEl.textContent = `${nahodny(zacatky)} ${nahodny(kdo)} ${nahodny(coSeStalo)}`;
+        // Napůl skládačka, napůl hotová výmluva s odůvodněním
+        if (Math.random() < 0.5) {
+          excuseEl.textContent = `${nahodny(zacatky)} ${nahodny(kdo)} ${nahodny(coSeStalo)}`;
+        } else {
+          const [vymluva, oduvodneni] = nahodny(hotove);
+          excuseEl.textContent = `${vymluva} ${oduvodneni}`;
+        }
         excuseEl.classList.remove("fade");
         pocet++;
         counterEl.textContent = `Vygenerováno výmluv: ${pocet}`;
