@@ -77,6 +77,7 @@
       justify-content: center;
       font-size: clamp(18px, 4vw, 22px);
       line-height: 1.5;
+      white-space: pre-line;
       transition: opacity 0.2s ease;
     }
     .card.fade { opacity: 0; }
@@ -301,7 +302,91 @@
       [{ m: "Nemohl jsem přijít, protože jsem byl na tajné poradě o budoucnosti brambor.", f: "Nemohla jsem přijít, protože jsem byla na tajné poradě o budoucnosti brambor." }, { m: "Víc říct nemůžu, podepsal jsem mlčenlivost. 🥔", f: "Víc říct nemůžu, podepsala jsem mlčenlivost. 🥔" }],
     ];
 
+    // Sada 20 × 20 × 20 (z vymluvy-20x20x20.md). Skládá se jen sama se sebou:
+    // viníci jsou všichni v 1. pádě jednotného čísla a události v přítomném čase 3. osoby,
+    // takže text je stejný pro všechny rody i pro mluvčího.
+    const sada20 = {
+      zacatky: [
+        "Dnes se mnou nepočítejte, protože",
+        "Moje účast se odkládá, protože",
+        "Slib platí, jen jeho splnění komplikuje fakt, že",
+        "Hlásím drobnou katastrofu, protože",
+        "Dnešní plán má jednu slabinu, protože",
+        "Zatím prosím nezačínejte, protože",
+        "Potřebuji dalších deset minut, protože",
+        "Můj příchod zatím nelze potvrdit, protože",
+        "Tohle bude znít jako výmluva, ale",
+        "Všechno mám pod kontrolou, až na to, že",
+        "Prosím o náhradní termín, protože",
+        "Omluva bude delší než moje účast, protože",
+        "Dnešní povinnosti přenechávám osudu, protože",
+        "Moje dostupnost je teď spíš teoretická, protože",
+        "Za vzniklé komplikace může skutečnost, že",
+        "Dorazím, až se vyřeší drobnost: právě teď",
+        "Prosím o trochu pochopení, protože",
+        "Na svou obhajobu uvádím, že",
+        "V tuto chvíli nemohu nic slíbit, protože",
+        "Mám výjimečně skutečný důvod, protože",
+      ],
+      // rod: mz = mužský životný, mn = mužský neživotný, f = ženský, n = střední
+      kdo: [
+        { text: "revizor v županu", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "krtek s razítkem", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "plyšový žralok", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "kouzelník na rekvalifikaci", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "jezevec s manažerským kurzem", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "zahradní trpaslík v podmínce", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "předseda spolku uražených", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "figurant z reklamy na štěstí", rod: "mz", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "automat na kávu s doktorátem", rod: "mn", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "rohlík s přehnaným sebevědomím", rod: "mn", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "můj stín v reflexní vestě", rod: "mn", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "pudink s vlastním názorem", rod: "mn", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "pokojová palma s megafonem", rod: "f", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "účetní v kostýmu dinosaura", rod: "f", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "veverka z personálního oddělení", rod: "f", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "gumová bota po osvícení", rod: "f", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "žížala s diplomatickou imunitou", rod: "f", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "zrcadlo po motivačním semináři", rod: "n", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "kuře s policejním odznakem", rod: "n", cislo: "sg", osoba: 3, pad: 1 },
+        { text: "avokádo před důchodem", rod: "n", cislo: "sg", osoba: 3, pad: 1 },
+      ],
+      // [událost, pointa]: pointa patří jen ke své události a zobrazí se po prázdném řádku
+      coSeStalo: [
+        ["mi kontroluje občanku, jízdenku a životní rozhodnutí."],
+        ["mi účtuje pokutu za podezřele rychlé pondělí."],
+        ["mě učí nenápadnosti přes megafon."],
+        ["mě odmítá pustit dál bez souhlasu mého budoucího já."],
+        ["mi zabavuje levou nohu.", "Pravá je zatím jen svědek."],
+        ["mi nabízí svobodu pouze v prémiovém předplatném."],
+        ["mě nutí podepsat, že dnešek přebírám bez závad."],
+        ["mi organizuje osobní rozvoj.", "Začínáme rozkladem."],
+        ["mi zakazuje předbíhat dobu.", "Údajně je těhotná."],
+        ["mi měří rychlost myšlení.", "Přístroj zatím ukazuje parkování."],
+        ["mi dává pořadové číslo.", "Jsem za nekonečnem."],
+        ["mi vyčítá nedostatek iniciativy a drží mě přitom za kotník."],
+        ["mě zapisuje do soutěže o nejzbytečnější přítomnost.", "Bohužel vedu."],
+        ["mi zkouší vypnout a zapnout osobnost.", "Zatím funguje jen vypnutí."],
+        ["mi vyhlašuje minutu ticha za ztracený čas.", "Už třetí hodinu."],
+        ["mě přesvědčuje, že jsem vedlejší postava a dnes nemám scénu."],
+        ["mi nabízí tři možnosti: čekat, čekat slušně a čekat venku."],
+        ["mi vrací dnešek k přepracování.", "Prý je moc podobný včerejšku."],
+        ["mě zastavuje slovy „jen krátká otázka“ a rozkládá projektor."],
+        ["mi píše omluvenku.", "Zatím má nadpis „Doznání“."],
+      ],
+    };
+
     const nahodny = (pole) => pole[Math.floor(Math.random() * pole.length)];
+
+    // Losuje bez opakování: položka se vrátí až po vystřídání všech ostatních
+    function pytlik(pole) {
+      let zbyva = [];
+      return () => {
+        if (zbyva.length === 0) zbyva = [...pole];
+        return zbyva.splice(Math.floor(Math.random() * zbyva.length), 1)[0];
+      };
+    }
+    const dalsiUdalost20 = pytlik(sada20.coSeStalo);
 
     // Vrátí správný tvar položky: prostý text beze změny, jinak variantu podle klíče
     const tvar = (polozka, klic) => (typeof polozka === "string" ? polozka : polozka[klic]);
@@ -320,6 +405,14 @@
     function hotova() {
       const [vymluva, oduvodneni] = nahodny(hotove);
       return (mluvci) => `${tvar(vymluva, mluvci)} ${tvar(oduvodneni, mluvci)}`;
+    }
+
+    function skladacka20() {
+      const z = nahodny(sada20.zacatky);
+      const k = nahodny(sada20.kdo);
+      const [udalost, pointa] = dalsiUdalost20();
+      const text = `${z} ${k.text} ${udalost}` + (pointa ? `\n\n${pointa}` : "");
+      return () => text;
     }
 
     const excuseEl = document.getElementById("excuse");
@@ -344,8 +437,8 @@
       excuseEl.classList.add("fade");
       potatoEl.classList.toggle("spin");
       setTimeout(() => {
-        // Napůl skládačka, napůl hotová výmluva s odůvodněním
-        aktualni = Math.random() < 0.5 ? skladacka() : hotova();
+        // Třetinová šance: původní skládačka, hotová výmluva, nebo sada 20 × 20 × 20
+        aktualni = nahodny([skladacka, hotova, skladacka20])();
         excuseEl.textContent = aktualni(mluvci);
         excuseEl.classList.remove("fade");
         pocet++;
