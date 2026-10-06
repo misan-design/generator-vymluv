@@ -50,7 +50,22 @@
     }
     .potato.spin { transform: rotate(360deg) scale(1.15); }
     h1 { margin: 8px 0 4px; font-size: clamp(28px, 6vw, 40px); }
-    .sub { color: var(--muted); margin: 0 0 24px; }
+    .sub { color: var(--muted); margin: 0 0 20px; }
+    .rod {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border-radius: 999px;
+      border: 2px solid var(--muted);
+    }
+    .rod button {
+      padding: 8px 18px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .rod button[aria-pressed="true"] { background: var(--accent); color: #fff; }
     .card {
       background: var(--card);
       border-radius: 18px;
@@ -95,6 +110,11 @@
     <h1>Generátor výmluv</h1>
     <p class="sub">Když potřebuješ výmluvu a fantazie stávkuje.</p>
 
+    <div class="rod" role="group" aria-label="Kdo se vymlouvá">
+      <button id="rod-m" aria-pressed="true">👨 Jsem muž</button>
+      <button id="rod-f" aria-pressed="false">👩 Jsem žena</button>
+    </div>
+
     <div class="card" id="excuse">Klikni na tlačítko a získej dokonalou výmluvu.</div>
 
     <div class="buttons">
@@ -108,127 +128,225 @@
   </main>
 
   <script>
-    // Výmluva se skládá ze tří náhodných dílů: začátek + kdo/co + co se stalo
+    // Gramatická pravidla jsou popsaná v README.md.
+    // Položka je buď prostý text (gramaticky se nemění), nebo objekt s variantami tvarů:
+    //   podle mluvčího:        { m: "…", f: "…" }
+    //   podle původce děje:    { m: "…", f: "…", n: "…", pl: "…" }  (pl = mužský životný v množném čísle)
+
+    // 1. díl: začátek věty, tvar podle mluvčího
     const zacatky = [
-      "Promiň, nemohl/a jsem přijít, protože",
+      { m: "Promiň, nemohl jsem přijít, protože", f: "Promiň, nemohla jsem přijít, protože" },
       "Úkol nemám, protože",
       "Omlouvám se za zpoždění, ale",
-      "Nevzal/a jsem telefon, protože",
-      "Na schůzku jsem nedorazil/a, jelikož",
-      "Nádobí jsem neumyl/a, protože",
-      "Do posilovny jsem nešel/nešla, protože",
+      { m: "Nevzal jsem telefon, protože", f: "Nevzala jsem telefon, protože" },
+      { m: "Na schůzku jsem nedorazil, jelikož", f: "Na schůzku jsem nedorazila, jelikož" },
+      { m: "Nádobí jsem neumyl, protože", f: "Nádobí jsem neumyla, protože" },
+      { m: "Do posilovny jsem nešel, protože", f: "Do posilovny jsem nešla, protože" },
     ];
 
+    // 2. díl: původce děje s rodem a číslem
     const kdo = [
-      "moje kočka",
-      "soused z třetího patra",
-      "rozzlobený holub",
-      "moje babička",
-      "skupina turistů z Japonska",
-      "můj toustovač",
-      "tajemný muž v pyžamu",
-      "křeček mého bratrance",
-      "robotický vysavač",
-      "jedna velmi sebevědomá kachna",
+      { text: "moje kočka", rod: "f", cislo: "sg" },
+      { text: "soused z třetího patra", rod: "m", cislo: "sg" },
+      { text: "rozzlobený holub", rod: "m", cislo: "sg" },
+      { text: "moje babička", rod: "f", cislo: "sg" },
+      { text: "skupina turistů z Japonska", rod: "f", cislo: "sg" },
+      { text: "můj toustovač", rod: "m", cislo: "sg" },
+      { text: "tajemný muž v pyžamu", rod: "m", cislo: "sg" },
+      { text: "křeček mého bratrance", rod: "m", cislo: "sg" },
+      { text: "robotický vysavač", rod: "m", cislo: "sg" },
+      { text: "jedna velmi sebevědomá kachna", rod: "f", cislo: "sg" },
+      { text: "ztracené house", rod: "n", cislo: "sg" },
+      { text: "rozzlobení holubi", rod: "m", cislo: "pl" },
     ];
 
+    // 3. díl: co se stalo, tvar podle původce děje (případně i podle mluvčího)
     const coSeStalo = [
-      "zamkl/a moje klíče v mikrovlnce.",
-      "vyhlásil/a na mě osobní válku.",
-      "mi snědl/a ponožky a musel/a jsem počkat, až je vrátí.",
-      "mě uvěznil/a ve hře na schovávanou, která trvala 6 hodin.",
-      "prohlásil/a můj byt za nezávislý stát.",
-      "mi přeprogramoval/a budík na čínský čas.",
-      "mě unesl/a na tajnou poradu o budoucnosti brambor.",
-      "se zasekl/a ve dveřích a odmítl/a se pohnout.",
-      "mi ukradl/a boty a utekl/a s nimi do parku.",
-      "mě přesvědčil/a, že je dnes neděle.",
-      "omylem objednal/a 40 pizz na moji adresu.",
-      "spustil/a požární alarm, protože chtěl/a slyšet hudbu.",
+      {
+        m: "zamkl moje klíče v mikrovlnce.",
+        f: "zamkla moje klíče v mikrovlnce.",
+        n: "zamklo moje klíče v mikrovlnce.",
+        pl: "zamkli moje klíče v mikrovlnce.",
+      },
+      {
+        m: "vyhlásil na mě osobní válku.",
+        f: "vyhlásila na mě osobní válku.",
+        n: "vyhlásilo na mě osobní válku.",
+        pl: "vyhlásili na mě osobní válku.",
+      },
+      {
+        m: { m: "mi snědl ponožky a musel jsem počkat, až je vrátí.", f: "mi snědl ponožky a musela jsem počkat, až je vrátí." },
+        f: { m: "mi snědla ponožky a musel jsem počkat, až je vrátí.", f: "mi snědla ponožky a musela jsem počkat, až je vrátí." },
+        n: { m: "mi snědlo ponožky a musel jsem počkat, až je vrátí.", f: "mi snědlo ponožky a musela jsem počkat, až je vrátí." },
+        pl: { m: "mi snědli ponožky a musel jsem počkat, až je vrátí.", f: "mi snědli ponožky a musela jsem počkat, až je vrátí." },
+      },
+      {
+        m: "mě uvěznil ve hře na schovávanou, která trvala 6 hodin.",
+        f: "mě uvěznila ve hře na schovávanou, která trvala 6 hodin.",
+        n: "mě uvěznilo ve hře na schovávanou, která trvala 6 hodin.",
+        pl: "mě uvěznili ve hře na schovávanou, která trvala 6 hodin.",
+      },
+      {
+        m: "prohlásil můj byt za nezávislý stát.",
+        f: "prohlásila můj byt za nezávislý stát.",
+        n: "prohlásilo můj byt za nezávislý stát.",
+        pl: "prohlásili můj byt za nezávislý stát.",
+      },
+      {
+        m: "mi přeprogramoval budík na čínský čas.",
+        f: "mi přeprogramovala budík na čínský čas.",
+        n: "mi přeprogramovalo budík na čínský čas.",
+        pl: "mi přeprogramovali budík na čínský čas.",
+      },
+      {
+        m: "mě unesl na tajnou poradu o budoucnosti brambor.",
+        f: "mě unesla na tajnou poradu o budoucnosti brambor.",
+        n: "mě uneslo na tajnou poradu o budoucnosti brambor.",
+        pl: "mě unesli na tajnou poradu o budoucnosti brambor.",
+      },
+      {
+        m: "se zasekl ve dveřích a odmítl se pohnout.",
+        f: "se zasekla ve dveřích a odmítla se pohnout.",
+        n: "se zaseklo ve dveřích a odmítlo se pohnout.",
+        pl: "se zasekli ve dveřích a odmítli se pohnout.",
+      },
+      {
+        m: "mi ukradl boty a utekl s nimi do parku.",
+        f: "mi ukradla boty a utekla s nimi do parku.",
+        n: "mi ukradlo boty a uteklo s nimi do parku.",
+        pl: "mi ukradli boty a utekli s nimi do parku.",
+      },
+      {
+        m: "mě přesvědčil, že je dnes neděle.",
+        f: "mě přesvědčila, že je dnes neděle.",
+        n: "mě přesvědčilo, že je dnes neděle.",
+        pl: "mě přesvědčili, že je dnes neděle.",
+      },
+      {
+        m: "omylem objednal 40 pizz na moji adresu.",
+        f: "omylem objednala 40 pizz na moji adresu.",
+        n: "omylem objednalo 40 pizz na moji adresu.",
+        pl: "omylem objednali 40 pizz na moji adresu.",
+      },
+      {
+        // bez druhého „protože“, aby věta dávala smysl za každým začátkem
+        m: "spustil požární alarm, jen aby slyšel nějakou hudbu.",
+        f: "spustila požární alarm, jen aby slyšela nějakou hudbu.",
+        n: "spustilo požární alarm, jen aby slyšelo nějakou hudbu.",
+        pl: "spustili požární alarm, jen aby slyšeli nějakou hudbu.",
+      },
     ];
 
-    // Hotové výmluvy s odůvodněním (z vymluvy-research.md)
+    // Hotové výmluvy s odůvodněním (z vymluvy-research.md), tvar podle mluvčího
     const hotove = [
       // 🚗 Doprava
-      ["Tramvaj odmítla jet, dokud si všichni cestující neřeknou, co mají dneska v plánu.", "Já byl/a poslední a nechtěl/a jsem lhát."],
+      ["Tramvaj odmítla jet, dokud si všichni cestující neřeknou, co mají dneska v plánu.", { m: "Já byl poslední a nechtěl jsem lhát.", f: "Já byla poslední a nechtěla jsem lhát." }],
       ["Navigace mě poslala do Rakouska.", "Prý tam byla kratší fronta."],
-      ["Přes silnici přecházela husí rodina o 47 členech.", "Poslední house si zapomněla klíče a vracela se."],
+      ["Přes silnici přecházela husí rodina o 47 členech.", "Poslední house si zapomnělo klíče a vracelo se."],
       ["Moje kolo mělo krizi středního věku a odjelo samo k moři.", "Nechalo mi lístek, že se vrátí, až se najde."],
       ["Řidič autobusu se rozhodl, že dnes pojede pozpátku.", "Prý aby viděl, odkud jsme přijeli."],
-      ["Zasekl/a jsem se v otočných dveřích obchodního centra.", "Udělal/a jsem 312 koleček, než mě vysvobodila ochranka."],
+      [{ m: "Zasekl jsem se v otočných dveřích obchodního centra.", f: "Zasekla jsem se v otočných dveřích obchodního centra." }, { m: "Udělal jsem 312 koleček, než mě vysvobodila ochranka.", f: "Udělala jsem 312 koleček, než mě vysvobodila ochranka." }],
       // 😴 Zaspání
-      ["Budík mi v noci tajně přešel na letní čas jiné planety.", "Na Marsu jsem byl/a ještě včas."],
-      ["Zdálo se mi, že už jsem v práci, tak jsem nevstával/a.", "Ve snu jsem byl/a mimochodem velmi produktivní."],
-      ["Kočka mi seděla na hrudi a usoudil/a jsem, že by bylo nezdvořilé ji budit.", "Je to starší dáma, má nárok."],
-      ["Peřina mě nepustila.", "Doslova. Zip se zasekl a já byl/a uvnitř."],
+      ["Budík mi v noci tajně přešel na letní čas jiné planety.", { m: "Na Marsu jsem byl ještě včas.", f: "Na Marsu jsem byla ještě včas." }],
+      [{ m: "Zdálo se mi, že už jsem v práci, tak jsem nevstával.", f: "Zdálo se mi, že už jsem v práci, tak jsem nevstávala." }, { m: "Ve snu jsem byl mimochodem velmi produktivní.", f: "Ve snu jsem byla mimochodem velmi produktivní." }],
+      [{ m: "Kočka mi seděla na hrudi a usoudil jsem, že by bylo nezdvořilé ji budit.", f: "Kočka mi seděla na hrudi a usoudila jsem, že by bylo nezdvořilé ji budit." }, "Je to starší dáma, má nárok."],
+      ["Peřina mě nepustila.", { m: "Doslova. Zip se zasekl a já byl uvnitř.", f: "Doslova. Zip se zasekl a já byla uvnitř." }],
       ["Telefon se v noci aktualizoval a smazal všechna rána.", "Máme teď jen odpoledne."],
       // 🌧️ Počasí
-      ["Foukal tak silný vítr, že jsem dvakrát dorazil/a domů, i když jsem šel/šla opačně.", "Fyzika mi to doteď nevysvětlila."],
-      ["Napadlo tolik sněhu, že mě sousedi omylem postavili jako sněhuláka.", "Měl/a jsem mrkev a všechno."],
-      ["Pršelo tak, že jsem čekal/a na archu.", "Zvířata šla po dvou a já byl/a sám/sama, tak mě nevzali."],
+      [{ m: "Foukal tak silný vítr, že jsem dvakrát dorazil domů, i když jsem šel opačně.", f: "Foukal tak silný vítr, že jsem dvakrát dorazila domů, i když jsem šla opačně." }, "Fyzika mi to doteď nevysvětlila."],
+      ["Napadlo tolik sněhu, že mě sousedi omylem postavili jako sněhuláka.", { m: "Měl jsem mrkev a všechno.", f: "Měla jsem mrkev a všechno." }],
+      [{ m: "Pršelo tak, že jsem čekal na archu.", f: "Pršelo tak, že jsem čekala na archu." }, { m: "Zvířata šla po dvou a já byl sám, tak mě nevzali.", f: "Zvířata šla po dvou a já byla sama, tak mě nevzali." }],
       ["Bylo takové horko, že se mi rozpustily tkaničky.", "Bosky se jít nedalo, asfalt byl tekutý."],
-      ["Mlha byla tak hustá, že jsem zabloudil/a ve vlastní chodbě.", "Našel/našla jsem tam mimochodem ztracené ponožky z roku 2019."],
+      [{ m: "Mlha byla tak hustá, že jsem zabloudil ve vlastní chodbě.", f: "Mlha byla tak hustá, že jsem zabloudila ve vlastní chodbě." }, { m: "Našel jsem tam mimochodem ztracené ponožky z roku 2019.", f: "Našla jsem tam mimochodem ztracené ponožky z roku 2019." }],
       // 🤒 Nemoc
       ["Mám alergii na pondělí.", "Doktor říkal, že je to vzácné, ale nevyléčitelné."],
-      ["Snědl/a jsem prošlý jogurt a teď mluvím jen ve verších.", "Na poradě by to bylo trapné, rým za rýmem jde mi hladce, však myšlenky mám chabé, vratké."],
-      ["Kýchl/a jsem tak silně, že jsem si vyhodil/a záda i fantazii.", "Ani tuhle výmluvu jsem nevymyslel/a sám/sama."],
-      ["Zjistil/a jsem, že jsem v noci náměsíčně uběhl/a maraton.", "Mám medaili a nevím odkud."],
-      ["Dostal/a jsem škytavku, která trvá už tři dny.", "Lékaři ji pojmenovali po mně."],
+      [{ m: "Snědl jsem prošlý jogurt a teď mluvím jen ve verších.", f: "Snědla jsem prošlý jogurt a teď mluvím jen ve verších." }, "Na poradě by to bylo trapné, rým za rýmem jde mi hladce, však myšlenky mám chabé, vratké."],
+      [{ m: "Kýchl jsem tak silně, že jsem si vyhodil záda i fantazii.", f: "Kýchla jsem tak silně, že jsem si vyhodila záda i fantazii." }, { m: "Ani tuhle výmluvu jsem nevymyslel sám.", f: "Ani tuhle výmluvu jsem nevymyslela sama." }],
+      [{ m: "Zjistil jsem, že jsem v noci náměsíčně uběhl maraton.", f: "Zjistila jsem, že jsem v noci náměsíčně uběhla maraton." }, "Mám medaili a nevím odkud."],
+      [{ m: "Dostal jsem škytavku, která trvá už tři dny.", f: "Dostala jsem škytavku, která trvá už tři dny." }, "Lékaři ji pojmenovali po mně."],
       // 👵 Rodina a děti
       ["Babička se naučila používat videohovory a volá každých 5 minut.", "Většinou jen ukazuje strop."],
       ["Synovec mi schoval boty a za nápovědu chce 200 Kč.", "Vyjednávání stále probíhá."],
-      ["Tchyně nemohla přestat mluvit.", "Skutečná výmluva z průzkumu, jen jsem ji vylepšil/a: mluví pořád."],
+      ["Tchyně nemohla přestat mluvit.", { m: "Skutečná výmluva z průzkumu, jen jsem ji vylepšil: mluví pořád.", f: "Skutečná výmluva z průzkumu, jen jsem ji vylepšila: mluví pořád." }],
       ["Brácha se zamkl v koupelně a jediný klíč spolkl.", "Čekáme, až příroda udělá svoje."],
-      ["Děda vyhlásil rodinnou poradu o tom, kdo snědl poslední řízek.", "Byl/a jsem obviněn/a a musel/a se hájit."],
+      ["Děda vyhlásil rodinnou poradu o tom, kdo snědl poslední řízek.", { m: "Byl jsem obviněn a musel jsem se hájit.", f: "Byla jsem obviněna a musela jsem se hájit." }],
       // 🐈 Zvířata
       ["Pes mi snědl úkol a pak i náhradní úkol.", "Teď už je to princip."],
       ["Kočka mi zamkla klíče v mikrovlnce.", "A heslo k mikrovlnce zná jen ona."],
       ["Na balkoně se mi usadil holub a odmítá odejít, dokud mu neuznám nárok na byt.", "Má právníka."],
-      ["Křeček utekl a já ho musel/a stopovat podle drobků.", "Vedly do sousedovy kuchyně. Tam jsem zůstal/a na oběd."],
+      [{ m: "Křeček utekl a já ho musel stopovat podle drobků.", f: "Křeček utekl a já ho musela stopovat podle drobků." }, { m: "Vedly do sousedovy kuchyně. Tam jsem zůstal na oběd.", f: "Vedly do sousedovy kuchyně. Tam jsem zůstala na oběd." }],
       ["Soused mi svěřil papouška, který umí jen říkat „nikam nechoď“.", "Bylo by nezdvořilé ho neposlechnout."],
       // 📱 Technika
       ["Můj robotický vysavač vyhlásil stávku a zablokoval dveře.", "Požaduje kratší pracovní dobu a víc nabíjení."],
       ["Telefon mi spadl do kafe a teď mluví jen italsky.", "Rozumím jen „espresso“."],
       ["Lednička mi poslala zprávu, že bez ní nikam nesmím.", "Chytré domácnosti zašly moc daleko."],
-      ["Wi-Fi spadla a já nevěděl/a, jak se z bytu dostat bez Google Map.", "Dveře nemají aktualizace."],
-      ["Moje e-mailová schránka se přeplnila a začala vracet e-maily i do minulosti.", "Proto jste ode mě dostali zprávu, kterou jsem ještě nenapsal/a."],
-      ["Toustovač vystřelil toust tak vysoko, že jsem čekal/a, až dopadne.", "Pořád nedopadl."],
+      [{ m: "Wi-Fi spadla a já nevěděl, jak se z bytu dostat bez Google Maps.", f: "Wi-Fi spadla a já nevěděla, jak se z bytu dostat bez Google Maps." }, "Dveře nemají aktualizace."],
+      ["Moje e-mailová schránka se přeplnila a začala vracet e-maily i do minulosti.", { m: "Proto jste ode mě dostali zprávu, kterou jsem ještě nenapsal.", f: "Proto jste ode mě dostali zprávu, kterou jsem ještě nenapsala." }],
+      [{ m: "Toustovač vystřelil toust tak vysoko, že jsem čekal, až dopadne.", f: "Toustovač vystřelil toust tak vysoko, že jsem čekala, až dopadne." }, "Pořád nedopadl."],
       // 📚 Škola a úkoly
-      ["Úkol jsem udělal/a, ale vítr ho odnesl do vedlejšího okresu.", "Tam ho prý někdo odevzdal za mě."],
-      ["Napsal/a jsem ho neviditelným inkoustem kvůli ochraně autorských práv.", "Pro zobrazení je potřeba citrón a důvěra."],
+      [{ m: "Úkol jsem udělal, ale vítr ho odnesl do vedlejšího okresu.", f: "Úkol jsem udělala, ale vítr ho odnesl do vedlejšího okresu." }, "Tam ho prý někdo odevzdal za mě."],
+      [{ m: "Napsal jsem ho neviditelným inkoustem kvůli ochraně autorských práv.", f: "Napsala jsem ho neviditelným inkoustem kvůli ochraně autorských práv." }, "Pro zobrazení je potřeba citrón a důvěra."],
       ["Učebnici mi zabavil celník, protože obsahovala podezřelé množství rovnic.", "Prý se v nich skrývá x."],
-      ["Úkol jsem si uložil/a do cloudu a pak začalo pršet.", "Data jsou teď někde v kanalizaci."],
+      [{ m: "Úkol jsem si uložil do cloudu a pak začalo pršet.", f: "Úkol jsem si uložila do cloudu a pak začalo pršet." }, "Data jsou teď někde v kanalizaci."],
       ["Mladší sourozenec můj úkol vybarvil a teď je to umělecké dílo.", "Odevzdávat ho by byla škoda, je v galerii."],
       // 🗓️ Zapomnětlivost
-      ["Myslel/a jsem, že je víkend.", "Skutečná výmluva z průzkumu. Ten pocit jsem si nechtěl/a zkazit."],
-      ["Byl/a jsem přesvědčen/a, že dnes je státní svátek brambor.", "Slavím ho každý rok, vy ne?"],
-      ["Vstal/a jsem včas, ale omylem jsem se znovu oblékl/a do pyžama.", "Tělo prostě ví, co chce."],
-      ["Zapomněl/a jsem, kde bydlím, a bloudil/a jsem po celém sídlišti.", "Nakonec mě poznal pes od sousedů."],
-      ["Zamkl/a jsem se na záchodě a jediný klíč měl kocour.", "Ten byl zrovna na procházce."],
+      [{ m: "Myslel jsem, že je víkend.", f: "Myslela jsem, že je víkend." }, { m: "Skutečná výmluva z průzkumu. Ten pocit jsem si nechtěl zkazit.", f: "Skutečná výmluva z průzkumu. Ten pocit jsem si nechtěla zkazit." }],
+      [{ m: "Byl jsem přesvědčen, že dnes je státní svátek brambor.", f: "Byla jsem přesvědčena, že dnes je státní svátek brambor." }, "Slavím ho každý rok, vy ne?"],
+      [{ m: "Vstal jsem včas, ale omylem jsem se znovu oblékl do pyžama.", f: "Vstala jsem včas, ale omylem jsem se znovu oblékla do pyžama." }, "Tělo prostě ví, co chce."],
+      [{ m: "Zapomněl jsem, kde bydlím, a bloudil jsem po celém sídlišti.", f: "Zapomněla jsem, kde bydlím, a bloudila jsem po celém sídlišti." }, "Nakonec mě poznal pes od sousedů."],
+      [{ m: "Zamkl jsem se na záchodě a jediný klíč měl kocour.", f: "Zamkla jsem se na záchodě a jediný klíč měl kocour." }, "Ten byl zrovna na procházce."],
       // 🏋️ Sport a povinnosti
-      ["Do posilovny jsem nešel/nešla, protože si činky potřebovaly odpočinout.", "Regenerace je důležitá, i pro železo."],
-      ["Nádobí jsem neumyl/a, protože talíře vytvořily umělecký projekt.", "Jmenuje se „Odvážná věž“ a nechci ho zničit."],
-      ["Nemohl/a jsem přijít, protože jsem byl/a na tajné poradě o budoucnosti brambor.", "Víc říct nemůžu, podepsal/a jsem mlčenlivost. 🥔"],
+      [{ m: "Do posilovny jsem nešel, protože si činky potřebovaly odpočinout.", f: "Do posilovny jsem nešla, protože si činky potřebovaly odpočinout." }, "Regenerace je důležitá, i pro železo."],
+      [{ m: "Nádobí jsem neumyl, protože talíře vytvořily umělecký projekt.", f: "Nádobí jsem neumyla, protože talíře vytvořily umělecký projekt." }, "Jmenuje se „Odvážná věž“ a nechci ho zničit."],
+      [{ m: "Nemohl jsem přijít, protože jsem byl na tajné poradě o budoucnosti brambor.", f: "Nemohla jsem přijít, protože jsem byla na tajné poradě o budoucnosti brambor." }, { m: "Víc říct nemůžu, podepsal jsem mlčenlivost. 🥔", f: "Víc říct nemůžu, podepsala jsem mlčenlivost. 🥔" }],
     ];
 
     const nahodny = (pole) => pole[Math.floor(Math.random() * pole.length)];
 
+    // Vrátí správný tvar položky: prostý text beze změny, jinak variantu podle klíče
+    const tvar = (polozka, klic) => (typeof polozka === "string" ? polozka : polozka[klic]);
+
+    // Klíč tvaru podle původce děje: m / f / n, v množném čísle pl
+    const klicPuvodce = (k) => (k.cislo === "pl" ? "pl" : k.rod);
+
+    // Výmluva je funkce mluvčího, aby šla po přepnutí muž/žena přepsat bez změny obsahu
+    function skladacka() {
+      const z = nahodny(zacatky);
+      const k = nahodny(kdo);
+      const c = nahodny(coSeStalo);
+      return (mluvci) => `${tvar(z, mluvci)} ${k.text} ${tvar(tvar(c, klicPuvodce(k)), mluvci)}`;
+    }
+
+    function hotova() {
+      const [vymluva, oduvodneni] = nahodny(hotove);
+      return (mluvci) => `${tvar(vymluva, mluvci)} ${tvar(oduvodneni, mluvci)}`;
+    }
+
     const excuseEl = document.getElementById("excuse");
     const potatoEl = document.getElementById("potato");
     const counterEl = document.getElementById("counter");
+    const rodM = document.getElementById("rod-m");
+    const rodF = document.getElementById("rod-f");
     let pocet = 0;
+    let mluvci = "m";
+    let aktualni = null;
+
+    function nastavMluvciho(novy) {
+      mluvci = novy;
+      rodM.setAttribute("aria-pressed", novy === "m");
+      rodF.setAttribute("aria-pressed", novy === "f");
+      if (aktualni) excuseEl.textContent = aktualni(mluvci);
+    }
+    rodM.addEventListener("click", () => nastavMluvciho("m"));
+    rodF.addEventListener("click", () => nastavMluvciho("f"));
 
     document.getElementById("generate").addEventListener("click", () => {
       excuseEl.classList.add("fade");
       potatoEl.classList.toggle("spin");
       setTimeout(() => {
         // Napůl skládačka, napůl hotová výmluva s odůvodněním
-        if (Math.random() < 0.5) {
-          excuseEl.textContent = `${nahodny(zacatky)} ${nahodny(kdo)} ${nahodny(coSeStalo)}`;
-        } else {
-          const [vymluva, oduvodneni] = nahodny(hotove);
-          excuseEl.textContent = `${vymluva} ${oduvodneni}`;
-        }
+        aktualni = Math.random() < 0.5 ? skladacka() : hotova();
+        excuseEl.textContent = aktualni(mluvci);
         excuseEl.classList.remove("fade");
         pocet++;
         counterEl.textContent = `Vygenerováno výmluv: ${pocet}`;
