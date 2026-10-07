@@ -103,6 +103,69 @@
     .secondary { background: transparent; color: var(--text); border: 2px solid var(--muted); }
     .counter { margin-top: 18px; color: var(--muted); font-size: 14px; }
     footer { margin-top: 32px; color: var(--muted); font-size: 13px; }
+
+    /* Názory a nápady */
+    .nazory {
+      margin-top: 56px;
+      padding-top: 36px;
+      border-top: 2px dashed var(--muted);
+      text-align: left;
+    }
+    .nazory h2 { margin: 0 0 6px; font-size: 24px; text-align: center; }
+    .nazory .sub { text-align: center; margin-bottom: 22px; }
+    .formular {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .otazka { font-weight: 600; font-size: 15px; margin-bottom: 8px; }
+    .cipy { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cip {
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid transparent;
+    }
+    .cip:hover { border-color: var(--accent); }
+    .cip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .napoveda { font-size: 13px; color: var(--muted); margin-top: 8px; }
+    .formular textarea,
+    .formular input[type="text"] {
+      width: 100%;
+      font: inherit;
+      color: var(--text);
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .formular textarea { min-height: 110px; resize: vertical; }
+    .formular textarea:focus,
+    .formular input[type="text"]:focus { border-color: var(--accent); }
+    .radek { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .pocitadlo { font-size: 13px; color: var(--muted); }
+    .past { position: absolute; left: -9999px; }
+    .stav { text-align: center; font-weight: 600; margin: 0; }
+    .stav:empty { display: none; }
+    .seznam { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .nazor {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: var(--shadow);
+    }
+    .nazor .hlavicka { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+    .nazor .hlavicka strong { color: var(--text); }
+    .nazor p { margin: 0; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+    .prazdno { text-align: center; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -126,6 +189,51 @@
     <div class="counter" id="counter"></div>
 
     <footer>Použití na vlastní nebezpečí. Autor nenese odpovědnost za ztracené přátele ani zaměstnání.</footer>
+
+    <section class="nazory" aria-labelledby="nazory-nadpis">
+      <h2 id="nazory-nadpis">💬 Co ty na to?</h2>
+      <p class="sub">Pobavilo tě to? Něco chybí? Máš vlastní výmluvu? Stačí pár slov, bez registrace.</p>
+
+      <form class="formular" id="formular">
+        <div>
+          <div class="otazka">Jak se ti generátor líbí?</div>
+          <div class="cipy" id="nalady">
+            <button type="button" class="cip" data-nalada="😂">😂 Skvělý</button>
+            <button type="button" class="cip" data-nalada="🙂">🙂 Dobrý</button>
+            <button type="button" class="cip" data-nalada="😐">😐 Nic moc</button>
+            <button type="button" class="cip" data-nalada="💡">💡 Mám nápad</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="otazka" for="zprava">Tvůj názor nebo nápad</label>
+          <textarea id="zprava" maxlength="1000" placeholder="Třeba: Chybí mi výmluvy na rande…" required></textarea>
+          <div class="napoveda">Nevíš, jak začít? Klikni na jednu z vět:</div>
+          <div class="cipy" id="zacatky-vet" style="margin-top: 8px">
+            <button type="button" class="cip">Nejvíc mě pobavilo…</button>
+            <button type="button" class="cip">Chybí mi výmluvy na…</button>
+            <button type="button" class="cip">Mám vlastní výmluvu:</button>
+            <button type="button" class="cip">Bylo by fajn, kdyby…</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="otazka" for="jmeno">Jméno nebo přezdívka <span style="font-weight: 400; color: var(--muted)">(nepovinné)</span></label>
+          <input type="text" id="jmeno" maxlength="40" placeholder="Anonymní brambora 🥔">
+        </div>
+
+        <!-- Past na roboty: člověk toto pole nevidí ani nevyplní -->
+        <input type="text" id="web" class="past" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="radek">
+          <span class="pocitadlo" id="pocitadlo">0 / 1000</span>
+          <button type="submit" class="primary" id="odeslat">📨 Odeslat</button>
+        </div>
+        <p class="stav" id="stav" role="status"></p>
+      </form>
+
+      <div class="seznam" id="seznam"></div>
+    </section>
   </main>
 
   <script>
@@ -455,6 +563,123 @@
       }
       setTimeout(() => (e.target.textContent = "📋 Zkopírovat"), 1500);
     });
+
+    // ---------- Názory a nápady (ukládají se do databáze Supabase) ----------
+    // Veřejná adresa projektu a veřejný (publishable) klíč. Oba jsou určené k vložení do webu.
+    const SUPABASE_URL = "https://qcebcjbqxxivdllblgpd.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_e0kCoXmhFmKtU9lAzxY5aw_fQ8FJc5b";
+    const API = `${SUPABASE_URL}/rest/v1/nazory`;
+
+    const formular = document.getElementById("formular");
+    const zpravaEl = document.getElementById("zprava");
+    const jmenoEl = document.getElementById("jmeno");
+    const stavEl = document.getElementById("stav");
+    const seznamEl = document.getElementById("seznam");
+    const pocitadloEl = document.getElementById("pocitadlo");
+    const odeslatEl = document.getElementById("odeslat");
+    let nalada = null;
+
+    document.querySelectorAll("#nalady .cip").forEach((cip) => {
+      cip.addEventListener("click", () => {
+        nalada = nalada === cip.dataset.nalada ? null : cip.dataset.nalada;
+        document.querySelectorAll("#nalady .cip").forEach((c) =>
+          c.setAttribute("aria-pressed", c.dataset.nalada === nalada)
+        );
+      });
+    });
+
+    document.querySelectorAll("#zacatky-vet .cip").forEach((cip) => {
+      cip.addEventListener("click", () => {
+        const veta = cip.textContent.replace("…", " ");
+        zpravaEl.value = zpravaEl.value.trim() ? `${zpravaEl.value.trim()}\n${veta}` : veta;
+        zpravaEl.dispatchEvent(new Event("input"));
+        zpravaEl.focus();
+        zpravaEl.setSelectionRange(zpravaEl.value.length, zpravaEl.value.length);
+      });
+    });
+
+    zpravaEl.addEventListener("input", () => {
+      pocitadloEl.textContent = `${zpravaEl.value.length} / 1000`;
+    });
+
+    const casova = new Intl.RelativeTimeFormat("cs", { numeric: "auto" });
+    function predCasem(datum) {
+      const sekundy = (new Date(datum) - Date.now()) / 1000;
+      const jednotky = [["year", 31536000], ["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]];
+      for (const [jednotka, delka] of jednotky) {
+        if (Math.abs(sekundy) >= delka) return casova.format(Math.round(sekundy / delka), jednotka);
+      }
+      return "právě teď";
+    }
+
+    // Text se vkládá přes textContent, takže nikdo nemůže do stránky podstrčit vlastní kód
+    function vykresliNazory(nazory) {
+      seznamEl.replaceChildren();
+      if (nazory.length === 0) {
+        const p = document.createElement("p");
+        p.className = "prazdno";
+        p.textContent = "Zatím tu nic není. Buď první! 🥔";
+        seznamEl.append(p);
+        return;
+      }
+      for (const n of nazory) {
+        const karta = document.createElement("article");
+        karta.className = "nazor";
+        const hlavicka = document.createElement("div");
+        hlavicka.className = "hlavicka";
+        const jmeno = document.createElement("strong");
+        jmeno.textContent = n.jmeno || "Anonymní brambora";
+        hlavicka.append(n.nalada ? `${n.nalada} ` : "", jmeno, ` · ${predCasem(n.created_at)}`);
+        const text = document.createElement("p");
+        text.textContent = n.zprava;
+        karta.append(hlavicka, text);
+        seznamEl.append(karta);
+      }
+    }
+
+    async function nactiNazory() {
+      try {
+        const odpoved = await fetch(`${API}?select=jmeno,nalada,zprava,created_at&order=created_at.desc&limit=50`, {
+          headers: { apikey: SUPABASE_KEY },
+        });
+        if (!odpoved.ok) throw new Error(odpoved.status);
+        vykresliNazory(await odpoved.json());
+      } catch {
+        seznamEl.innerHTML = '<p class="prazdno">Názory se teď nepodařilo načíst. Zkus to prosím za chvíli.</p>';
+      }
+    }
+
+    formular.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (document.getElementById("web").value) return; // vyplnil robot
+      const zprava = zpravaEl.value.trim();
+      if (zprava.length < 3) {
+        stavEl.textContent = "Napiš prosím aspoň pár slov. 🙂";
+        return;
+      }
+      odeslatEl.disabled = true;
+      stavEl.textContent = "Odesílám…";
+      try {
+        const odpoved = await fetch(API, {
+          method: "POST",
+          headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify({ jmeno: jmenoEl.value.trim() || null, nalada, zprava }),
+        });
+        if (!odpoved.ok) throw new Error(odpoved.status);
+        formular.reset();
+        nalada = null;
+        document.querySelectorAll("#nalady .cip").forEach((c) => c.setAttribute("aria-pressed", false));
+        pocitadloEl.textContent = "0 / 1000";
+        stavEl.textContent = "Díky! Tvůj názor je tady dole. 🎉";
+        nactiNazory();
+      } catch {
+        stavEl.textContent = "Odeslání se nepovedlo. Zkus to prosím znovu.";
+      } finally {
+        odeslatEl.disabled = false;
+      }
+    });
+
+    nactiNazory();
   </script>
 </body>
 </html>
